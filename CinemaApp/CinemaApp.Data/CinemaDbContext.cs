@@ -4,26 +4,29 @@ using System.Reflection;
 
 namespace CinemaApp.Data
 {
-    public class CinemaDbContext : DbContext
-    {
+	public class CinemaDbContext : DbContext
+	{
 
-        public CinemaDbContext()
-        {
+		public CinemaDbContext()
+		{
 
-        }
+		}
 
-        public CinemaDbContext(DbContextOptions options)
-            : base(options)
-        {
+		public CinemaDbContext(DbContextOptions options)
+			: base(options)
+		{
 
-        }
+		}
 
-        public virtual DbSet<Movie> Movies { get; set; }
+		public virtual DbSet<Movie> Movies { get; set; } = null!;
+		public virtual DbSet<Cinema> Cinemas { get; set; } = null!;
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        }
+		public virtual DbSet<CinemaMovie> CinemasMovies { get; set; } = null!;
 
-    }
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+		}
+
+	}
 }

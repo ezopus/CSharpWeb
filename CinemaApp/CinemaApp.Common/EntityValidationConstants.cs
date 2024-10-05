@@ -17,6 +17,17 @@
 
 			public const int DurationMinValue = 1;
 			public const int DurationMaxValue = 999;
+
+			public const string ReleaseDateFormat = "MM/dddd";
+		}
+
+		public static class Cinema
+		{
+			public const int CinemaNameMinLength = 2;
+			public const int CinemaNameMaxLength = 30;
+
+			public const int CinemaLocationMinLength = 2;
+			public const int CinemaLocationMaxLength = 86;
 		}
 	}
 }

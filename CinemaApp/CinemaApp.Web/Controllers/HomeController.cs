@@ -16,7 +16,7 @@ namespace CinemaApp.Web.Controllers
             // two ways to pass data to the view
             // 1. viewdata/viewbag
             // 2. pass ViewModel to View
-            ViewData["Title"] = "Home Page";
+            ViewData["MovieTitle"] = "Home Page";
             ViewData["Message"] = "Welcome to our Cinema Web App!";
             return View();
         }
