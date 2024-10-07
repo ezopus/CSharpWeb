@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Configuration\" />
+    <ProjectReference Include="..\Common\StorageLocker.Common.csproj" />
   </ItemGroup>
 
 </Project>
