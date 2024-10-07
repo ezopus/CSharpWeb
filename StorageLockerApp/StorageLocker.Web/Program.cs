@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using StorageLocker.Web.Data;
+using StorageLocker.Data.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
