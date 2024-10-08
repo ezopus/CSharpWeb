@@ -37,6 +37,9 @@ namespace StorageLocker.Data.Data.Configuration
                 }
             };
 
+            var inputUsersJson = @"../../../Datasets/users.json";
+            //var importUsers = JsonSerializer.Serialize<ApplicationUser[]>(inputUsersJson);
+
             return customers;
         }
     }
