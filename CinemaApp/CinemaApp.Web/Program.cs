@@ -1,46 +1,58 @@
 using CinemaApp.Data;
+using CinemaApp.Data.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace CinemaApp.Web
 {
-	public class Program
-	{
-		public static void Main(string[] args)
-		{
-			WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-			string connectionString = builder.Configuration.GetConnectionString("SQLServer");
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+            string connectionString = builder.Configuration.GetConnectionString("SQLServer");
 
-			// Add services to the container.
-			builder.Services.AddDbContext<CinemaDbContext>(options =>
-			{
-				//OnConfiguration method
-				options.UseSqlServer(connectionString);
-			});
+            // Add services to the container.
+            builder.Services.AddDbContext<CinemaDbContext>(options =>
+            {
+                //OnConfiguration method
+                options.UseSqlServer(connectionString);
+            });
 
-			builder.Services.AddControllersWithViews();
+            builder.Services
+                .AddDefaultIdentity<ApplicationUser>(options =>
+                {
 
-			var app = builder.Build();
+                })
+                .AddRoles<IdentityRole<Guid>>()
+                .AddEntityFrameworkStores<CinemaDbContext>();
 
-			// Configure the HTTP request pipeline.
-			if (!app.Environment.IsDevelopment())
-			{
-				app.UseExceptionHandler("/Home/Error");
-				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-				app.UseHsts();
-			}
+            builder.Services.AddControllersWithViews();
 
-			app.UseHttpsRedirection();
-			app.UseStaticFiles();
+            var app = builder.Build();
 
-			app.UseRouting();
+            // Configure the HTTP request pipeline.
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
 
-			app.UseAuthorization();
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
 
-			app.MapControllerRoute(
-				name: "default",
-				pattern: "{controller=Home}/{action=Index}/{id?}");
+            app.UseRouting();
 
-			app.Run();
-		}
-	}
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+            app.MapRazorPages();
+
+            app.Run();
+        }
+    }
 }
