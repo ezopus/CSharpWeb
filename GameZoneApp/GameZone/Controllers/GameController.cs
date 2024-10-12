@@ -88,15 +88,21 @@ namespace GameZone.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            string currentUserId = GetCurrentUserId();
-
+            //if game id doesn't exist return to all
             var game = dbContext.Games.FirstOrDefault(g => g.Id == id);
+            if (game == null)
+            {
+                return RedirectToAction(nameof(All));
+            }
 
+            //if game exists but current logged in user is not authorized to edit game
+            string currentUserId = GetCurrentUserId();
             if (game != null && game.PublisherId != currentUserId)
             {
                 return RedirectToAction(nameof(All));
             }
 
+            //get game to edit
             var model = await dbContext
                 .Games
                 .Where(g => g.Id == id)
