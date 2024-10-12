@@ -24,7 +24,7 @@ namespace GameZone.Data.Models
         public string Description { get; set; } = null!;
 
         [Comment("Game image URL")]
-        public string? Url { get; set; }
+        public string? ImageUrl { get; set; }
 
         [Required]
         [ForeignKey(nameof(Publisher))]
