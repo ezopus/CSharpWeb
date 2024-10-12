@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GameZone.Migrations
 {
     [DbContext(typeof(GameZoneDbContext))]
-    [Migration("20241012125658_InitialMigration")]
+    [Migration("20241012130501_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
