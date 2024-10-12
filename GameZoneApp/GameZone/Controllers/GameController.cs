@@ -60,17 +60,13 @@ namespace GameZone.Controllers
                 return View(model);
             }
 
-            DateTime releasedOn;
-
             if (DateTime.TryParseExact(model.ReleasedOn, ReleasedOnFormat, CultureInfo.CurrentCulture,
-                    DateTimeStyles.None, out releasedOn) == false)
+                    DateTimeStyles.None, out var releasedOn) == false)
             {
                 ModelState.AddModelError(nameof(model.ReleasedOn), "Invalid date format!");
 
                 return View(model);
             };
-
-
 
             Game game = new Game()
             {
@@ -85,18 +81,27 @@ namespace GameZone.Controllers
             await dbContext.Games.AddAsync(game);
             await dbContext.SaveChangesAsync();
 
-            return RedirectToAction(nameof(All));
+            return RedirectToAction(nameof(MyZone));
         }
 
 
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
+            string currentUserId = GetCurrentUserId();
+
+            var game = dbContext.Games.FirstOrDefault(g => g.Id == id);
+
+            if (game != null && game.PublisherId != currentUserId)
+            {
+                return RedirectToAction(nameof(All));
+            }
+
             var model = await dbContext
                 .Games
                 .Where(g => g.Id == id)
                 .AsNoTracking()
-                .Select(g => new GameViewModel()
+                .Select(g => new GameEditModel()
                 {
                     Description = g.Description,
                     GenreId = g.GenreId,
@@ -108,35 +113,39 @@ namespace GameZone.Controllers
 
             model.Genres = await GetGenres();
 
-            return View();
+            return View(model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(GameViewModel model, int id)
+        public async Task<IActionResult> Edit(GameEditModel model, int id)
         {
             if (ModelState.IsValid == false)
             {
                 return View(model);
             }
 
-            DateTime releasedOn;
-
             if (DateTime.TryParseExact(model.ReleasedOn, ReleasedOnFormat, CultureInfo.CurrentCulture,
-                    DateTimeStyles.None, out releasedOn) == false)
+                    DateTimeStyles.None, out var releasedOn) == false)
             {
                 ModelState.AddModelError(nameof(model.ReleasedOn), "Invalid date format!");
 
                 return View(model);
             };
 
-            Game? editedGame = await dbContext.Games.FindAsync(id);
+            var game = await dbContext.Games.FindAsync(id);
 
-            editedGame.Description = model.Description;
-            editedGame.GenreId = model.GenreId;
-            editedGame.ImageUrl = model.ImageUrl;
-            editedGame.PublisherId = GetCurrentUserId() ?? string.Empty;
-            editedGame.ReleasedOn = releasedOn;
-            editedGame.Title = model.Title;
+            if (game == null)
+            {
+                throw new ArgumentException("Game id invalid.");
+            }
+
+            game.Id = model.Id;
+            game.Title = model.Title;
+            game.Description = model.Description;
+            game.GenreId = model.GenreId;
+            game.ImageUrl = model.ImageUrl ?? string.Empty;
+            game.PublisherId = GetCurrentUserId() ?? string.Empty;
+            game.ReleasedOn = releasedOn;
 
             await dbContext.SaveChangesAsync();
 
@@ -146,35 +155,137 @@ namespace GameZone.Controllers
         [HttpGet]
         public async Task<IActionResult> MyZone()
         {
-            return View(new List<GameViewModel>());
+            string currentUsedId = GetCurrentUserId();
+
+            var model = await dbContext.Games
+                .Where(g => g.IsDeleted == false)
+                .Where(g => g.GamersGames.Any(gr => gr.GamerId == currentUsedId))
+                .Select(g => new GameInfoViewModel()
+                {
+                    Id = g.Id,
+                    Genre = g.Genre.Name,
+                    ImageUrl = g.ImageUrl,
+                    Publisher = g.Publisher.UserName ?? string.Empty,
+                    ReleasedOn = g.ReleasedOn.ToString(ReleasedOnFormat),
+                    Title = g.Title
+
+                })
+                .AsNoTracking()
+                .ToListAsync();
+
+            return View(model);
         }
 
         [HttpGet]
         public async Task<IActionResult> AddToMyZone(int id)
         {
-            return View();
+            Game? game = await dbContext.Games
+                .Where(g => g.Id == id)
+                .Include(g => g.GamersGames)
+                .FirstOrDefaultAsync();
+
+            if (game == null || game.IsDeleted)
+            {
+                throw new ArgumentException("Invalid id.");
+            }
+
+            string currentUsedId = GetCurrentUserId() ?? string.Empty;
+
+            if (game.GamersGames.Any(gr => gr.GamerId == currentUsedId) == false)
+            {
+                game.GamersGames.Add(new GamerGame()
+                {
+                    GameId = game.Id,
+                    GamerId = currentUsedId
+                });
+
+                await dbContext.SaveChangesAsync();
+                return RedirectToAction(nameof(MyZone));
+            }
+            else
+            {
+                return RedirectToAction(nameof(All));
+            }
         }
         [HttpGet]
         public async Task<IActionResult> StrikeOut(int id)
         {
-            return View();
+            Game? game = await dbContext.Games
+                .Where(g => g.Id == id)
+                .Include(g => g.GamersGames)
+                .FirstOrDefaultAsync();
+
+            if (game == null || game.IsDeleted)
+            {
+                throw new ArgumentException("Invalid id.");
+            }
+
+            string currentUsedId = GetCurrentUserId() ?? string.Empty;
+
+            GamerGame? gamerGame = dbContext.GamersGames
+                    .FirstOrDefault(gr => gr.GamerId == currentUsedId);
+
+            if (gamerGame != null)
+            {
+                game.GamersGames.Remove(gamerGame);
+                await dbContext.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(MyZone));
         }
 
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-            return View();
+            var model = await dbContext.Games
+                .Where(g => g.Id == id)
+                .Where(g => g.IsDeleted == false)
+                .Select(g =>
+                new GameDetailsViewModel()
+                {
+                    Id = g.Id,
+                    Title = g.Title,
+                    Description = g.Description,
+                    Genre = g.Genre.Name,
+                    ImageUrl = g.ImageUrl ?? string.Empty,
+                    Publisher = g.Publisher.UserName ?? string.Empty,
+                    ReleasedOn = g.ReleasedOn.ToString(ReleasedOnFormat),
+                })
+                .FirstOrDefaultAsync();
+
+            return View(model);
         }
 
         [HttpGet]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(GameDeleteViewModel model, int id)
         {
-            return View();
+            var gameToDelete = await dbContext.Games
+                .Where(g => g.Id == id && g.IsDeleted == false)
+                .AsNoTracking()
+                .Select(g => new GameDeleteViewModel()
+                {
+                    Id = g.Id,
+                    Title = g.Title,
+                    Publisher = g.Publisher.UserName ?? string.Empty,
+                })
+                .FirstOrDefaultAsync();
+
+            return View(model);
         }
         [HttpPost]
-        public async Task<IActionResult> Delete()
+        public async Task<IActionResult> DeleteConfirmed(GameDeleteViewModel model)
         {
-            return View();
+            Game? game = await dbContext.Games
+                .Where(g => g.Id == model.Id && g.IsDeleted == false)
+                .FirstOrDefaultAsync();
+
+            if (game != null)
+            {
+                game.IsDeleted = true;
+                await dbContext.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(MyZone));
         }
 
         private string GetCurrentUserId()
