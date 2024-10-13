@@ -47,7 +47,7 @@
 
         public Type Type { get; set; } = null!;
 
-        public List<EventParticipant> EventsParticipants { get; set; } = new List<EventParticipant>();
+        public ICollection<EventParticipant> EventsParticipants { get; set; } = new List<EventParticipant>();
 
 
 

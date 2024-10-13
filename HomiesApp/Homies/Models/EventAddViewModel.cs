@@ -4,8 +4,6 @@
     using static Homies.Common.ValidationConstants.Event;
     public class EventAddViewModel
     {
-        //Name, Description, Start, End, TypeId, CreatedOn, Types
-
         [Required]
         [StringLength(EventNameMaxLength, MinimumLength = EventNameMinLength)]
         public string Name { get; set; } = null!;
@@ -15,18 +13,15 @@
         public string Description { get; set; } = null!;
 
         [Required]
-        public string Start { get; set; }
+        public string Start { get; set; } = string.Empty;
 
         [Required]
-        public string End { get; set; }
-
-        [Required]
-        public DateTime CreatedOn { get; set; }
+        public string End { get; set; } = string.Empty;
 
         [Required]
         public int TypeId { get; set; }
 
-        public IList<Data.Models.Type> Types { get; set; } = null!;
+        public IEnumerable<TypeViewModel> Types { get; set; } = new List<TypeViewModel>();
 
     }
 }
