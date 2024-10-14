@@ -229,7 +229,7 @@ namespace GameZone.Controllers
             string currentUsedId = GetCurrentUserId() ?? string.Empty;
 
             GamerGame? gamerGame = dbContext.GamersGames
-                    .FirstOrDefault(gr => gr.GamerId == currentUsedId);
+                    .FirstOrDefault(gr => gr.GamerId == currentUsedId && gr.GameId == game.Id);
 
             if (gamerGame != null)
             {
