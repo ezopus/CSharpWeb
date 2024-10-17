@@ -79,11 +79,11 @@ namespace SoftUniBazar.Controllers
 
             string currentUserId = await GetCurrentUserId();
 
-            var seminarParticipant = await context.AdsBuyers
+            var adBuyer = await context.AdsBuyers
                 .Where(ad => ad.AdId == id && ad.BuyerId == currentUserId)
                 .FirstOrDefaultAsync();
 
-            if (seminarParticipant == null)
+            if (adBuyer == null)
             {
                 await context.AdsBuyers.AddAsync(new AdBuyer()
                 {
@@ -108,13 +108,13 @@ namespace SoftUniBazar.Controllers
 
             string currentUserId = await GetCurrentUserId();
 
-            var seminarParticipant = await context.AdsBuyers
+            var adBuyer = await context.AdsBuyers
                 .Where(ad => ad.AdId == id && ad.BuyerId == currentUserId)
                 .FirstOrDefaultAsync();
 
-            if (seminarParticipant != null)
+            if (adBuyer != null)
             {
-                context.AdsBuyers.Remove(seminarParticipant);
+                context.AdsBuyers.Remove(adBuyer);
                 await context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Cart));
