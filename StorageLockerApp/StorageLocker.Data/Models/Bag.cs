@@ -7,7 +7,7 @@ namespace StorageLocker.Data.Models
     public class Bag
     {
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
         [Required]
         public BagType BagType { get; set; }
